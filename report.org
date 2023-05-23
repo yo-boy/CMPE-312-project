@@ -5,9 +5,9 @@
 #+OPTIONS: \n
 #+OPTIONS: date
 #+OPTIONS: toc:nil
+#+OPTIONS: title:nil
 #+OPTIONS: num:nil
 #+LATEX_HEADER: \pagenumbering{gobble}
-
 \begin{titlepage}
 \begin{center}
 \vspace*{4cm}
