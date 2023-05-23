@@ -1,0 +1,25 @@
+#+LATEX_HEADER:\usepackage{graphicx}
+#+TITLE: THE SANTA CLAUS PROBLEM
+#+AUTHOR: Abdelrahman Abdin
+#+OPTIONS: author
+#+OPTIONS: \n
+#+OPTIONS: date
+#+OPTIONS: toc:nil
+#+OPTIONS: num:nil
+#+LATEX_HEADER: \pagenumbering{gobble}
+
+\begin{titlepage}
+\begin{center}
+\vspace*{4cm}
+{\Large THE SANTA CLAUS PROBLEM \par}
+\vspace{9cm}
+{\Large Abdelrahman Abdin \par}
+{\Large CMPE 312: Operating Systems \par}
+{\today}
+\vspace{1cm}
+\end{center}
+\vfill
+\includegraphics[width=0.4\linewidth]{bilgi_logo.png}
+\end{titlepage}
+
+* Problem definition
