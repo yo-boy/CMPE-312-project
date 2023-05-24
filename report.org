@@ -22,4 +22,18 @@
 \includegraphics[width=0.4\linewidth]{bilgi_logo.png}
 \end{titlepage}
 
-* Problem definition
+* Introduction
+John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1] 
+
+* Algorithm to solve
+#+begin_src python :eval no
+  class hello
+    for each add 5
+#+end_src
+
+\newpage
+
+* Footnotes
+
+[fn:1]J.A. Trono, ‘A new exercise in concurrency’, SIGCSE Bull., 26(3), 8–10 (1994). Corrigendum:
+26(4), 63 (1994). 
