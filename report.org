@@ -10,9 +10,9 @@
 #+LATEX_HEADER: \pagenumbering{gobble}
 \begin{titlepage}
 \begin{center}
-\vspace*{4cm}
+\vspace*{5cm}
 {\Large THE SANTA CLAUS PROBLEM \par}
-\vspace{9cm}
+\vspace{5cm}
 {\Large Abdelrahman Abdin \par}
 {\Large CMPE 312: Operating Systems \par}
 {\today}
@@ -23,13 +23,20 @@
 \end{titlepage}
 
 * Introduction
-John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1] 
+John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1], I will explain it in my own words Santa Clause likes to spend his time sleeping in his office, his reindeer (which are nine in number) enjoy their time in a tropical but return at christmas in order to help Santa deliver presents they wake up Santa once all nine of them arrive and he attaches them to the sleigh, they always take priority over any waiting elves since delivering presents is more time sensitive, the elves are many in number (not defined in the original problem other than being >3) and work on making toys but sometimes they have problems making toys and need Santa's help, but Santa's napping time is important so the elves are only allowed to wake Santa up when there are three of them with problems, when they wake him up, he helps those three elves and goes back to sleep.
 
-* Algorithm to solve
+* History of the problem
+
+* Methodology
 #+begin_src python :eval no
   class hello
     for each add 5
 #+end_src
+
+* Implementation
+
+* Conclusion
+
 
 \newpage
 
