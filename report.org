@@ -23,15 +23,40 @@
 \end{titlepage}
 
 * Introduction
-John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1], I will explain it in my own words Santa Clause likes to spend his time sleeping in his office, his reindeer (which are nine in number) enjoy their time in a tropical but return at christmas in order to help Santa deliver presents they wake up Santa once all nine of them arrive and he attaches them to the sleigh, they always take priority over any waiting elves since delivering presents is more time sensitive, the elves are many in number (not defined in the original problem other than being >3) and work on making toys but sometimes they have problems making toys and need Santa's help, but Santa's napping time is important so the elves are only allowed to wake Santa up when there are three of them with problems, when they wake him up, he helps those three elves and goes back to sleep.
-
-* History of the problem
+John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1], I will explain it in my own words, Santa Clause likes to spend his time sleeping in his office, his reindeer (which are nine in number) enjoy their time in a tropical island vacation but return at christmas in order to help Santa deliver presents, the last one wakes up Santa once all nine of them arrive and Santa attaches them to the sleigh to deliver presents, the elves are many in number[fn:2] and work on making toys but sometimes they have problems making toys and need Santa's help, but Santa's napping time is important so the elves are only allowed to wake Santa up when there are three of them with problems, when they wake him up, he helps those three elves and goes back to sleep.
 
 * Methodology
+** Analysis
+Now, let us analyze this problem first and then plan our solution, the main things we have to watch out for are:
+
+1) Only the third elf to arrive can wake up Santa, the first two must wait at the door.
+   
+2) Santa must help the three elves that arrived first and wait for any other elves to wake him up again before helping them.
+
+3) Santa can only be woken up by elves /*or*/ reindeer whoever arrives first.
+
+4) The reindeer wait for Santa to fasten them to the sleigh before helping deliver gifts.
+
+Taking all of these into account I will implement a solution using semaphores and mutexes, I will be using a mutex to insure only one elf or reindeer can wake up Santa and be helped by him at a time, and I will use semaphores to keep track of the elves and reindeer.
+
+** Psuedocode
+
+
+
+
+
+
+
+
 #+begin_src python :eval no
   class hello
     for each add 5
 #+end_src
+
+
+
+* History of the problem
+
 
 * Implementation
 
@@ -42,5 +67,6 @@ John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn
 
 * Footnotes
 
-[fn:1]J.A. Trono, ‘A new exercise in concurrency’, SIGCSE Bull., 26(3), 8–10 (1994). Corrigendum:
-26(4), 63 (1994). 
+[fn:1]J.A. Trono, ‘A new exercise in concurrency’, SIGCSE Bull., 26(3), 8–10 (1994). Corrigendum: 26(4), 63 (1994).
+
+[fn:2] not defined in the original problem other than being more than three.
