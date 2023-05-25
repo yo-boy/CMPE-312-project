@@ -11,7 +11,7 @@
 \begin{titlepage}
 \begin{center}
 \vspace*{5cm}
-{\Large THE SANTA CLAUS PROBLEM \par}
+{\Large THE SANTA CLAUSE PROBLEM \par}
 \vspace{5cm}
 {\Large Abdelrahman Abdin \par}
 {\Large CMPE 312: Operating Systems \par}
