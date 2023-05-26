@@ -7,7 +7,7 @@
 #include <stdbool.h>
 
 const int DEER = 9;
-const int ELVES = 10;
+const int ELVES = 20;
 
 pthread_mutex_t santaLock; /* lock for access to santa */
 int santaDoor = 0; /* int that keeps track of elves waiting at Santa's door (only 3 allowed) */
@@ -30,7 +30,7 @@ void getHelp(){
 
 void* elf(void* arg){
   while(true){
-    int workDuration = rand() % 10; /* get a number between 0 and 9 */
+    int workDuration = rand() % 100; /* get a number between 0 and 9 */
     printf("elf (%lu) is working for %d\n", pthread_self(), workDuration);
     sleep(workDuration); /* elf works for a random amount of time and then runs into a problem */
     pthread_mutex_lock(&santaLock);
@@ -64,7 +64,7 @@ void deliverPresents(){
 
 void* deer(void* arg){
   while(true){
-    int vacationTime = rand() % 10; /* take a vaccation for 0 to 19 seconds */
+    int vacationTime = rand() % 50; /* take a vaccation for 0 to 19 seconds */
     printf("reindeer (%lu) is vacationing for %d\n", pthread_self(), vacationTime);
     sleep(vacationTime);
     pthread_mutex_lock(&santaLock);
