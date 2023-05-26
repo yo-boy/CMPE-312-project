@@ -105,7 +105,7 @@ void* santa(void* arg){
       }
       deerReady = false; /* flip the barrier for next loop */
       printf("Santa delivered all presents and returned to the north pole\n");
-    }else if(santaDoor == 3){ 
+    }else if(santaDoor == 3){
       sem_post(&helpQue); /* if it was the elves that woke santa, help all three elves */
       printf("Santa helped an elf\n");
       sem_post(&helpQue);
