@@ -5,8 +5,8 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-const int DEER = 9;
-const int ELVES = 20;
+const int DEER = 9; /* constant that controls the number of reindeer */
+const int ELVES = 20; /* constant that controls the number of elves */
 
 pthread_mutex_t santaLock; /* lock for access to santa */
 int santaDoor = 0; /* int that keeps track of elves waiting at Santa's door (only 3 allowed) */
@@ -43,7 +43,7 @@ void* elf(void* arg){
       getHelp();
       santaDoor -= 3;
       pthread_mutex_unlock(&santaLock);
-      pthread_mutex_unlock(&elfQueMutex);
+      pthread_mutex_unlock(&elfQueMutex); /* no elves can get in que until the last elf is done with Santa */
     }else{
       pthread_mutex_unlock(&santaLock);
       pthread_mutex_unlock(&elfQueMutex);
@@ -141,13 +141,7 @@ int main(){
 
   pthread_join(santaThread, NULL);
   
-  for(int i = 0; i < ELVES; i++){
-    pthread_join(elfThreads[i], NULL);
-  }
-  for(int i = 0; i < DEER; i++){
-    pthread_join(deerThreads[i], NULL);
-  }
-  
+  /* thread join is not needed since all threads run in an infinite loop and will never return, so we only have one to make the program not return */
   return 0;
 }
 
