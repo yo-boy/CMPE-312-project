@@ -34,7 +34,7 @@ void* elf(void* arg){
     printf("elf (%lu) is working for %d\n", pthread_self(), workDuration);
     sleep(workDuration); /* elf works for a random amount of time and then runs into a problem */
     pthread_mutex_lock(&santaLock);
-    printf("elf (%lu) has a problem and goes to Santa for help\n %d\n", pthread_self(),santaDoor);
+    printf("elf (%lu) has a problem and goes to Santa for help\n", pthread_self(),santaDoor);
     pthread_mutex_lock(&elfQueMutex);
     santaDoor++;
     if(santaDoor == 3){
