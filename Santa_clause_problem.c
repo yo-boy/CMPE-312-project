@@ -4,9 +4,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <time.h>
+#include <stdbool.h>
 
 const int DEER = 9;
-const int ELVES = 10;
+const int ELVES = 3;
 
 pthread_mutex_t santaLock; /* lock for access to santa */
 int santaDoor = 0; /* int that keeps track of elves waiting at Santa's door (only 3 allowed) */
@@ -21,27 +22,28 @@ pthread_mutex_t deerMutex; /* mutex to control access to the deer int */
 
 
 void getHelp(){
-  printf("elf (%lu) got help from Santa", pthread_self());
+  printf("elf (%lu) got help from Santa\n", pthread_self());
 }
 
 
-void* elf(){
+void* elf(void* arg){
   while(true){
     int workDuration = rand() % 10; /* get a number between 0 and 9 */
     printf("elf (%lu) is working for %d\n", pthread_self(), workDuration);
     sleep(workDuration); /* elf works for a random amount of time and then runs into a problem */
+    pthread_mutex_lock(&santaLock);
     pthread_mutex_lock(&elfQueMutex);
     santaDoor++;
     if(santaDoor == 3){
-      santaDoor -= 3;
-      pthread_mutex_lock(&santaLock);
       sem_post(&wakeSanta); /* wake Santa */
       sem_wait(&lastElf); /* wait until santa finishes helping the other two elves */
       sem_wait(&helpQue); /* elf gets help from santa */
       getHelp();
+      santaDoor -= 3;
       pthread_mutex_unlock(&santaLock);
       pthread_mutex_unlock(&elfQueMutex);
     }else{
+      pthread_mutex_unlock(&santaLock);
       pthread_mutex_unlock(&elfQueMutex);
       sem_wait(&helpQue); /* elf gets help from santa */
       getHelp();
@@ -51,29 +53,54 @@ void* elf(){
 
 void deliverPresents(){
   pthread_mutex_lock(&deerMutex);
-  deerWaiting--;
+  deerInStable--;
   pthread_mutex_unlock(&deerMutex);
-  printf("reindeer (%lu) helped deliver presents", pthread_self());
+  printf("reindeer (%lu) helped deliver presents\n", pthread_self());
 }
 
-void* deer(){
+void* deer(void* arg){
   while(true){
     int vacationTime = rand() % 20; /* take a vaccation for 0 to 19 seconds */
     printf("reindeer (%lu) is vacationing for %d\n", pthread_self(), vacationTime);
     sleep(vacationTime);
+    pthread_mutex_lock(&santaLock);
     pthread_mutex_lock(&deerMutex);
     deerInStable++;
     if(deerInStable == DEER){
-      pthread_mutex_lock(&santaLock);
+      printf("reindeer (%lu) arrived to the north pole and will wake up Santa\n", pthread_self());
       sem_post(&wakeSanta);
       pthread_mutex_unlock(&deerMutex);
-      wait(&deerWaiting);
+      sem_wait(&deerWaiting);
       deliverPresents();
-      
+      pthread_mutex_unlock(&santaLock);
     }else{
+      printf("reindeer (%lu) arrived to the north pole and is waiting for Santa\n", pthread_self());
+      pthread_mutex_unlock(&santaLock);
       pthread_mutex_unlock(&deerMutex);
-      wait(&deerWaiting);
+      sem_wait(&deerWaiting);
       deliverPresents();
+    }
+  }
+}
+
+void* santa(void* arg){
+  while(true){
+    printf("Santa is sleeping in his office\n");
+    sem_wait(&wakeSanta);
+    if(deerInStable == DEER){
+      for(int i = 0; i <= DEER; i++){
+	sem_post(&deerWaiting);
+	printf("Santa fastened a deer to the sleigh\n");
+      }
+      printf("Santa delivered the presents and returned\n");
+    }else if(santaDoor == 3){
+	sem_post(&helpQue);
+	printf("Santa helped an elf\n");
+	sem_post(&helpQue);
+	printf("Santa helped an elf\n");
+	sem_post(&lastElf);
+	sem_post(&helpQue);
+	printf("Santa helped three elves and closed his door\n");
     }
   }
 }
@@ -86,7 +113,29 @@ int main(){
   sem_init(&lastElf, 0, 0);
   pthread_mutex_init(&deerMutex, NULL);
   sem_init(&deerWaiting, 0, 0);
-  /*sem_getvalue(&santaDoor, &num); */
+
+  pthread_t deerThreads[DEER];
+  for(int i = 0; i < DEER; i++){
+    pthread_create(&deerThreads[i], NULL, deer, NULL);
+  }
+
+  pthread_t santaThread;
+  pthread_create(&santaThread, NULL, santa, NULL);
+
+  pthread_t elfThreads[ELVES];
+  for(int i = 0; i < ELVES; i++){
+    pthread_create(&elfThreads[i], NULL, elf, NULL);
+  }
+
+  pthread_join(santaThread, NULL);
+
+  for(int i = 0; i < ELVES; i++){
+    pthread_join(elfThreads[i], NULL);
+  }
+  for(int i = 0; i < DEER; i++){
+    pthread_join(deerThreads[i], NULL);
+  }
+  
   return 0;
 }
 
