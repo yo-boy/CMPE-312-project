@@ -37,23 +37,209 @@ Now, let us analyze this problem first and then plan our solution, the main thin
 
 4) The reindeer wait for Santa to fasten them to the sleigh before helping deliver gifts.
 
-Taking all of these into account I will implement a solution using semaphores and mutexes, I will be using a mutex to insure only one elf or reindeer can wake up Santa and be helped by him at a time, and I will use semaphores to keep track of the elves and reindeer.
+6) all reindeer must help santa deliver gifts before he can go back to sleep.
+
+7) deer and Elves should not be allowed to arrive at the same moment, one of them must arrive first so we can always know which one santa should help.
+
+8) the last deer to arrive should be the one to wake up santa.
+   
+Taking all of these into account I will implement a solution using semaphores and mutexes, and a barrier, I will be using a mutex to insure only one elf or reindeer can wake up Santa and be helped by him at a time, and I will use semaphores to keep track of the elves and reindeer, and the barrier to make sure all reindeer finish their job before santa goes back to sleep.
 
 ** Psuedocode
 
+*** Setup
+First we set up our costants, mutexes, semaphores, and barrier flags 
+#+ATTR_LATEX: :options frame=lines
+#+begin_src ruby
+  # Constants
+  constant DEER = 9  # Controls the number of reindeer
+  constant ELVES = 20  # Controls the number of elves
 
+  # Mutexes and Semaphores
+  # for santa
+  semaphore wakeSanta  # Semaphore that Santa will watch and wake up with a signal
+  mutex santaLock  # Lock for access to Santa
 
+  # for elves
+  integer santaDoor = 0  # Keeps track of elves waiting at the door (only 3 allowed)
+  mutex elfQueMutex  # control the access to the santaDoor integer
+  semaphore helpQue  # Semaphore to keep track of elves while Santa helps each one
+  # Semaphore to ensure the last elf gets helped by Santa and no one jumps in line
+  semaphore lastElf
 
+  # for deer
+  integer deerInStable = 0  # Keep track of deer waiting to be attached to the sleigh
+  semaphore deerWaiting  # Semaphore for deer waiting to be attached
+  # Barrier to wait until all deer are attached before going to deliver presents
+  boolean deerReady = false
+  # Semaphore to make sure all deer are finished before Santa returns home
+  semaphore deerFinished  
+  mutex deerMutex  # Mutex to control access to the deerInStable integer
+#+end_src
+\newpage
+*** Elf
+Here we define the help function for elves and the elf thread function.
+#+ATTR_LATEX: :options frame=lines
+#+begin_src ruby
 
-
-
-
-#+begin_src python :eval no
-  class hello
-    for each add 5
+  # Function: Elf gets help from Santa
+  def getHelp()
+    print "Elf (current_thread) got help from Santa"
+  end
+  # Function: Elf thread
+  def elf()
+    while true do
+      workDuration = random_number(0, 99)  # Get a random number between 0 and 99
+      print "Elf (current_thread) is working for workDuration"
+      # Elf works for a random amount of time and then runs into a problem
+      sleep(workDuration)  
+      # Lock Santa to ensure proper access to santaDoor and deerInStable
+      lock(santaLock)
+      print "Elf (current_thread) has a problem and goes to Santa for help"
+      lock(elfQueMutex)
+      santaDoor = santaDoor + 1
+      if santaDoor == 3 then  # Only the third elf triggers this
+	signal(wakeSanta)  # Wake Santa
+	wait(lastElf)  # Wait until Santa finishes helping the other two elves
+	wait(helpQue)  # Elf gets help from Santa
+	getHelp()
+	santaDoor = santaDoor - 3  # Reset santaDoor to 0
+	unlock(santaLock)
+	# No elves can get in queue until the last elf is done with Santa
+	unlock(elfQueMutex)
+      else
+	unlock(santaLock)  # Release the locks since this is not the last elf
+	unlock(elfQueMutex)
+	wait(helpQue)  # Elf gets help from Santa
+	getHelp()
+      end if
+    end while
+  end 
 #+end_src
 
+*** Reindeer 
+Here we define the deliver presents function for deer and the deer thread function.
+#+ATTR_LATEX: :options frame=lines
+#+begin_src ruby
+  # Function: Deliver presents
+  def deliverPresents()
+    lock(deerMutex)
+    deerInStable = deerInStable - 1
+    unlock(deerMutex)
+    signal(deerFinished)
+    print "Reindeer (current_thread) helped deliver presents"
+  end
 
+  # Function: Reindeer thread
+  def deer()
+    while true do
+      vacationTime = random_number(0, 49)  # Take a vacation for 0 to 49 seconds
+      print "Reindeer (current_thread) is vacationing for vacationTime"
+      sleep(vacationTime)
+      # Lock Santa to ensure proper access to deerInStable and santaDoor
+      lock(santaLock)  
+      lock(deerMutex)
+      deerInStable = deerInStable + 1
+      if deerInStable == DEER then
+	print "Reindeer (current_thread)
+		    arrived at the North Pole and will wake up Santa"
+	signal(wakeSanta)  # Wake up Santa
+	# Unlock deerMutex so each reindeer can remove themselves from the stable
+	unlock(deerMutex)
+	wait(deerWaiting)  # Wait to be attached to the sleigh
+	while not deerReady  # Wait here until all deer are attached
+	end while
+	deliverPresents()
+	unlock(santaLock)  # Release Santa after all presents are delivered
+      else
+	print "Reindeer (current_thread) arrived
+	      at the North Pole and is waiting for Santa"
+	unlock(santaLock)  # Release locks since this is not the last reindeer
+	unlock(deerMutex)
+	wait(deerWaiting)  # Wait to be attached to the sleigh
+	# Wait for all deer to be attached, then deliver presents
+	while not deerReady 
+	end while
+	deliverPresents()
+      end if
+    end while
+  end
+#+end_src
+
+*** Santa
+
+Here we define Santa's behavior in the thread function.
+#+ATTR_LATEX: :options frame=lines
+#+begin_src ruby
+  # Function: Santa thread
+  def santa()
+    while true do
+      print "Santa is sleeping in his office"
+      wait(wakeSanta)  # Wait to be awakened by the reindeer or the elves
+      # Check who woke Santa up (either reindeer or elves, not both)
+      if deerInStable == DEER then 
+	for i = 0 to DEER do
+	  signal(deerWaiting)  # Attach all deer to the sleigh
+	  print "Santa fastened a deer to the sleigh"
+	end for
+	print "Santa fastened all the deer and will deliver the presents"
+	deerReady = true  # After attaching all deer, flip the barrier flag
+	# Wait until all deer help deliver presents and then go back to the North Pole
+	for i = 0 to DEER-1 do
+	  wait(deerFinished)
+	end for
+	deerReady = false  # Flip the barrier for the next loop
+	print "Santa delivered all presents and returned to the North Pole"
+      else if santaDoor == 3 then # check if it was elves that woke up santa
+	signal(helpQue)  # If it was the elves that woke Santa, help all three elves
+	print "Santa helped an elf"
+	signal(helpQue)
+	print "Santa helped an elf"
+	# Signal to the last elf that the other two are finished, then help it
+	signal(lastElf)  
+	signal(helpQue)
+	print "Santa helped three elves and closed his door"
+      end if
+    end while
+  end
+#+end_src
+
+*** Main
+Initialization of mutexes and semaphores and creation of all of the threads in the main function.
+#+ATTR_LATEX: :options frame=lines
+#+begin_src ruby
+  # Main function
+  def main()
+    initialize(santaLock)
+    initialize(wakeSanta, 0)
+    initialize(helpQue, 0)
+    initialize(elfQueMutex)
+    initialize(lastElf, 0)
+    initialize(deerMutex)
+    initialize(deerWaiting, 0)
+    initialize(deerFinished, 0)
+
+    # Create a thread for each reindeer
+    reindeerThreads = array of threads with size DEER
+    for i = 0 to DEER-1 do
+      create_thread(reindeerThreads[i], deer)
+    end for
+
+    # Create the Santa thread
+    create_thread(santaThread, santa)
+
+    # Create a thread for each elf
+    elfThreads = array of threads with size ELVES
+    for i = 0 to ELVES-1 do
+      create_thread(elfThreads[i], elf)
+    end for
+
+    # Thread join is not needed since all threads run in an infinite loop 
+    # and will never return, so we only have one to make the program not return
+    join_thread(santaThread)
+    return 0
+  end
+#+end_src
 
 * History of the problem
 
