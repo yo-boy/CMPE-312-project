@@ -24,17 +24,17 @@ pthread_mutex_t deerMutex; /* mutex to control access to the deerInStable int */
 
 /* elf gets help from santa */
 void getHelp(){
-  printf("elf (%lu) got help from Santa\n", pthread_self());
+  printf("elf (%lu) got help from Santa\n", pthread_self() % 100);
 }
 
 
 void* elf(void* arg){
   while(true){
     int workDuration = rand() % 100; /* get a number between 0 and 99 */
-    printf("elf (%lu) is working for %d\n", pthread_self(), workDuration);
+    printf("elf (%lu) is working for %d\n", pthread_self() % 100, workDuration);
     sleep(workDuration); /* elf works for a random amount of time and then runs into a problem */
     pthread_mutex_lock(&santaLock); /* lock santa so santaDoor and  deerInStable can't be changed at the same time so Santa will always know who got to him first */
-    printf("elf (%lu) has a problem and goes to Santa for help\n", pthread_self());
+    printf("elf (%lu) has a problem and goes to Santa for help\n", pthread_self() % 100);
     pthread_mutex_lock(&elfQueMutex);
     santaDoor++;
     if(santaDoor == 3){ /* only the third elf will trigger this */
@@ -59,19 +59,21 @@ void deliverPresents(){
   deerInStable--;
   pthread_mutex_unlock(&deerMutex);
   sem_post(&deerFinished);
-  printf("reindeer (%lu) helped deliver presents\n", pthread_self());
+  /* when printing the thread id we only take the first 2 digits because it is unlikely that they are the duplicated */
+  /* the id does not look nice when printed in full */
+  printf("reindeer (%lu) helped deliver presents\n", pthread_self() % 100);
 }
 
 void* deer(void* arg){
   while(true){
     int vacationTime = rand() % 50; /* take a vaccation for 0 to 19 seconds */
-    printf("reindeer (%lu) is vacationing for %d\n", pthread_self(), vacationTime);
+    printf("reindeer (%lu) is vacationing for %d\n", pthread_self() % 100, vacationTime);
     sleep(vacationTime);
     pthread_mutex_lock(&santaLock); /* lock santa so deerInStable and santaDoor can't change at the same time */
     pthread_mutex_lock(&deerMutex);
     deerInStable++;
     if(deerInStable == DEER){
-      printf("reindeer (%lu) arrived to the north pole and will wake up Santa\n", pthread_self());
+      printf("reindeer (%lu) arrived to the north pole and will wake up Santa\n", pthread_self() % 100);
       sem_post(&wakeSanta); /* wake up santa */
       pthread_mutex_unlock(&deerMutex); /* unlock deermutex so each deer can remove themselves from stable */
       sem_wait(&deerWaiting); /* deer waiting to be attached to sleigh */
@@ -79,7 +81,7 @@ void* deer(void* arg){
       deliverPresents(); 
       pthread_mutex_unlock(&santaLock); /* releasing santa after all presents are delivered */
     }else{
-      printf("reindeer (%lu) arrived to the north pole and is waiting for Santa\n", pthread_self());
+      printf("reindeer (%lu) arrived to the north pole and is waiting for Santa\n", pthread_self() % 100);
       pthread_mutex_unlock(&santaLock); /* releasing locks since this is not the last deer */
       pthread_mutex_unlock(&deerMutex);
       sem_wait(&deerWaiting); /* waiting to be attached to sleigh */
