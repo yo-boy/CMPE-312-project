@@ -1,4 +1,5 @@
 #+LATEX_HEADER:\usepackage{graphicx}
+#+LATEX_HEADER: \usepackage[margin=0.9in]{geometry}
 #+TITLE: THE SANTA CLAUS PROBLEM
 #+AUTHOR: Abdelrahman Abdin
 #+OPTIONS: author
@@ -10,7 +11,7 @@
 #+LATEX_HEADER: \pagenumbering{gobble}
 \begin{titlepage}
 \begin{center}
-\vspace*{5cm}
+\vspace*{7cm}
 {\Large THE SANTA CLAUSE PROBLEM \par}
 \vspace{5cm}
 {\Large Abdelrahman Abdin \par}
@@ -44,12 +45,12 @@ Now, let us analyze this problem first and then plan our solution, the main thin
 8) the last deer to arrive should be the one to wake up santa.
    
 Taking all of these into account I will implement a solution using semaphores and mutexes, and a barrier, I will be using a mutex to insure only one elf or reindeer can wake up Santa and be helped by him at a time, and I will use semaphores to keep track of the elves and reindeer, and the barrier to make sure all reindeer finish their job before santa goes back to sleep.
-
+\newpage
 ** Psuedocode
 
 *** Setup
 First we set up our costants, mutexes, semaphores, and barrier flags 
-#+ATTR_LATEX: :options frame=lines
+#+ATTR_LATEX: :options frame=single
 #+begin_src ruby
   # Constants
   constant DEER = 9  # Controls the number of reindeer
@@ -79,7 +80,7 @@ First we set up our costants, mutexes, semaphores, and barrier flags
 \newpage
 *** Elf
 Here we define the help function for elves and the elf thread function.
-#+ATTR_LATEX: :options frame=lines
+#+ATTR_LATEX: :options frame=single
 #+begin_src ruby
 
   # Function: Elf gets help from Santa
@@ -116,10 +117,10 @@ Here we define the help function for elves and the elf thread function.
     end while
   end 
 #+end_src
-
+\newpage
 *** Reindeer 
 Here we define the deliver presents function for deer and the deer thread function.
-#+ATTR_LATEX: :options frame=lines
+#+ATTR_LATEX: :options frame=single
 #+begin_src ruby
   # Function: Deliver presents
   def deliverPresents()
@@ -165,11 +166,10 @@ Here we define the deliver presents function for deer and the deer thread functi
     end while
   end
 #+end_src
-
+\newpage
 *** Santa
-
 Here we define Santa's behavior in the thread function.
-#+ATTR_LATEX: :options frame=lines
+#+ATTR_LATEX: :options frame=single
 #+begin_src ruby
   # Function: Santa thread
   def santa()
@@ -203,10 +203,10 @@ Here we define Santa's behavior in the thread function.
     end while
   end
 #+end_src
-
+\newpage
 *** Main
 Initialization of mutexes and semaphores and creation of all of the threads in the main function.
-#+ATTR_LATEX: :options frame=lines
+#+ATTR_LATEX: :options frame=single
 #+begin_src ruby
   # Main function
   def main()
