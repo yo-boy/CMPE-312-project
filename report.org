@@ -24,7 +24,9 @@
 \end{titlepage}
 
 * Introduction
-John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1], I will explain it in my own words, Santa Clause likes to spend his time sleeping in his office, his reindeer (which are nine in number) enjoy their time in a tropical island vacation but return at christmas in order to help Santa deliver presents, the last one wakes up Santa once all nine of them arrive and Santa attaches them to the sleigh to deliver presents, the elves are many in number[fn:2] and work on making toys but sometimes they have problems making toys and need Santa's help, but Santa's napping time is important so the elves are only allowed to wake Santa up when there are three of them with problems, when they wake him up, he helps those three elves and goes back to sleep.
+John Trono defined the Santa Clause synchronization problem in his 1994 paper[fn:1], I will explain it in my own words, Santa Clause likes to spend his time sleeping in his office, his reindeer (which are nine in number) enjoy their time in a tropical island vacation but return at christmas in order to help Santa deliver presents, the last one wakes up Santa once all nine of them arrive and Santa attaches them to the sleigh to deliver presents, the elves are many in number[fn:2] and work on making toys but sometimes they have problems making toys and need Santa's help, but Santa's napping time is important so the elves are only allowed to wake Santa up when there are three of them with problems, when they wake him up, he helps those three elves and goes back to sleep.\bigskip
+
+This problem relates to multi-proccess communication, where there is more than one kind of proccess utilizing the main proccess to gain access to the resources it has, this is applicable to the access and usage of device drivers in an operating system, where multiple user and system programs access the driver with different requests concurrently.
 
 * Methodology
 ** Analysis
@@ -49,7 +51,7 @@ Taking all of these into account I will implement a solution using semaphores an
 ** Psuedocode
 
 *** Setup
-First we set up our costants, mutexes, semaphores, and barrier flags 
+First we set up our costants, mutexes, semaphores, and barrier flag
 #+ATTR_LATEX: :options frame=single
 #+begin_src ruby
   # Constants
@@ -77,9 +79,12 @@ First we set up our costants, mutexes, semaphores, and barrier flags
   semaphore deerFinished  
   mutex deerMutex  # Mutex to control access to the deerInStable integer
 #+end_src
+
+The number of reindeer and elves can be changed to anything, but the number of elves is hardcoded to be at least 3 for them to be helped by Santa. 
+
 \newpage
 *** Elf
-Here we define the help function for elves and the elf thread function.
+Here we define the gethelp function for elves and the elf thread function.
 #+ATTR_LATEX: :options frame=single
 #+begin_src ruby
 
@@ -117,7 +122,12 @@ Here we define the help function for elves and the elf thread function.
     end while
   end 
 #+end_src
-\newpage
+
+Here the elf bahavior is defined by a simple if statement that checks if it is the last elf, the elf loops infinitely and at the start of the loop it works (sleeps) for a random amount of time between 0-99, until it encounters an issue and needs Santa's help, then the elf locks Santa, this is in order to stop a reindeer from changing deerInStable (represents the number of deer waiting for Santa) at the same time as an elf changes santaDoor (which represents the number of elves waiting of Santa), this lock could be delayed until we are sure that this elf will be the third elf at the door, but that would add complexity to the code without much gain (due to the small number of elves), if we had an order of magnitude more elves then this optimization would be good to make.
+
+Then, if the elf is the last one it wakes up Santa and waits for Santa to help the other two and then help it before releasing the lock on Santa, if the elf is first or second, it just releases the lock on Santa and waits.
+
+
 *** Reindeer 
 Here we define the deliver presents function for deer and the deer thread function.
 #+ATTR_LATEX: :options frame=single
@@ -142,8 +152,8 @@ Here we define the deliver presents function for deer and the deer thread functi
       lock(deerMutex)
       deerInStable = deerInStable + 1
       if deerInStable == DEER then
-	print "Reindeer (current_thread)
-		    arrived at the North Pole and will wake up Santa"
+	print "Reindeer (current_thread) arrived at
+			the North Pole and will wake up Santa"
 	signal(wakeSanta)  # Wake up Santa
 	# Unlock deerMutex so each reindeer can remove themselves from the stable
 	unlock(deerMutex)
@@ -153,8 +163,8 @@ Here we define the deliver presents function for deer and the deer thread functi
 	deliverPresents()
 	unlock(santaLock)  # Release Santa after all presents are delivered
       else
-	print "Reindeer (current_thread) arrived
-	      at the North Pole and is waiting for Santa"
+	print "Reindeer (current_thread) arrived at
+			the North Pole and is waiting for Santa"
 	unlock(santaLock)  # Release locks since this is not the last reindeer
 	unlock(deerMutex)
 	wait(deerWaiting)  # Wait to be attached to the sleigh
@@ -166,7 +176,11 @@ Here we define the deliver presents function for deer and the deer thread functi
     end while
   end
 #+end_src
-\newpage
+
+Reindeer run in an infinite loop just like Santa and the elves, a deer takes a vacation (sleeps) for a random amount of time between 0-49 (these are arbitrary values), and after it flies back to the northpole it locks Santa and goes into the stable, if it is the last it wakes up Santa, if not then it releases the locks on Santa and waits to be attached to the sleigh, after it is attached it waits at the barrier for deerReady to change which signals Santa fastening all deer to the sleigh, after that happens all deer help deliver presents, here we used the extra deerFinished semaphore to signal to Santa when *all* of the deer finished delivering presents, as Santa should only return once all reindeer successfully helped with the present delivery (this isn't guranteed otherwise as the scheduler can neglect to run one of the reindeer threads).
+
+Note here that santaLock /can/ be released before all deer deliver their presents (if the last deer is not picked last by the scheduler) but this doesn't cause an issue as Santa only returns after all deer signal deerFinished, so an elf locking santaLock after one of the deer finishes is fine as Santa will just return and be immedietly woken up (because wakeSanta would have been signaled by the elf already) and would help the elves, avoiding any deadlock.
+
 *** Santa
 Here we define Santa's behavior in the thread function.
 #+ATTR_LATEX: :options frame=single
@@ -203,7 +217,11 @@ Here we define Santa's behavior in the thread function.
     end while
   end
 #+end_src
-\newpage
+
+Santa runs in an infinite loop and waits for wakeSanta to be signaled by either the last Reindeer or the third elf, and because of our usage of the santaLock when changing both deerInStable and santaDoor there is no way for both of our conditions here to return true so we avoid a deadlock where Santa wakes up and helps the deer while the elves are waiting for him (and are still holding santaLock), Santa's normal behavior has him handling either the elves or the deer, whoever woke him, if it was the deer he attaches them all to the sleigh and then signals that all of the deer are ready, then he waits using the loop for all 9(can be changed using the DEER constant) deer to be finished delivering gifts, after they are all finished he returns the ready flag and goes back home to sleep again (waiting on the signal to wakeSanta).
+
+If the elves are the ones that woke Santa, Santa helps the first elf, then the second, then tells the last one to come in and helps him, this is implemented this way to insure that another elf that just arrived can't skip in line (as the last elf is holding a lock on Santa door until he finishes getting help).
+
 *** Main
 Initialization of mutexes and semaphores and creation of all of the threads in the main function.
 #+ATTR_LATEX: :options frame=single
@@ -235,11 +253,13 @@ Initialization of mutexes and semaphores and creation of all of the threads in t
     end for
 
     # Thread join is not needed since all threads run in an infinite loop 
-    # and will never return, so we only have one to make the program not return
+    # and will never return, so we only have one to stop the program from returning
     join_thread(santaThread)
     return 0
   end
 #+end_src
+
+The main function is simple, we just initialize our semaphores and mutexes, then create threads for each deer, elf, and for Santa, then run those threads with the functions we had defined, we have a join statement for Santa to insure that the program doesn't terminate, none of our threads will return anyway since they all implement an infinite loop.
 
 * History of the problem
 
