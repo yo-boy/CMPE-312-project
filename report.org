@@ -351,11 +351,18 @@ elf (76) has a problem and goes to Santa for help
 Then here we can see that the loop will continue forever with deer returning from their vacations and elves running into problems while working, with Santa helping them.
 
 * History of the problem
+There have been many papers discussing this problem and proposing new solutions to it since it was published, in this section I will highlight three of these papers and quickly summarize what they did differently.
 
+1. In his 1998 paper[fn:3] Mordechai Ben-ari points out one issue with Trono's solution that was presented in the original paper and then he solves this issue by making an implemntation in Ada95 protected objects and Rendezvous which are more advanced synchronization constructs that are available in Ada95 and some other languages, falicitate making a more provably correct solution that can withstand a malicious scheduler, he also implements the same solution in Java which turns out more complex due to a lack of those advanced synchronization constructs. 
+
+2. 
+   
 * Conclusion
 
 * Footnotes
 
-[fn:1]J.A. Trono, ‘A new exercise in concurrency’, SIGCSE Bull., 26(3), 8–10 (1994). Corrigendum: 26(4), 63 (1994).
+[fn:1]J. A. Trono. A new exercise in concurrency. SIGCSE Bull., 26(3):8–10, 1994.
 
 [fn:2] not defined in the original problem other than being more than three.
+
+[fn:3]M. Ben-Ari. How to solve the Santa Claus problem. Concurrency: Practice and Experience, 10(6):485–496, 1998.
