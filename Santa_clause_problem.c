@@ -57,11 +57,11 @@ void* elf(void* arg){
 void deliverPresents(){
   pthread_mutex_lock(&deerMutex);
   deerInStable--;
+  printf("reindeer (%lu) helped deliver presents\n", pthread_self() % 100);
   pthread_mutex_unlock(&deerMutex);
   sem_post(&deerFinished);
   /* when printing the thread id we only take the first 2 digits because it is unlikely that they are the duplicated */
   /* the id does not look nice when printed in full */
-  printf("reindeer (%lu) helped deliver presents\n", pthread_self() % 100);
 }
 
 void* deer(void* arg){
