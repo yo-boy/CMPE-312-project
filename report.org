@@ -355,9 +355,12 @@ There have been many papers discussing this problem and proposing new solutions 
 
 1. In his 1998 paper[fn:3] Mordechai Ben-ari points out one issue with Trono's solution that was presented in the original paper and then he solves this issue by making an implemntation in Ada95 protected objects and Rendezvous which are more advanced synchronization constructs that are available in Ada95 and some other languages, falicitate making a more provably correct solution that can withstand a malicious scheduler, he also implements the same solution in Java which turns out more complex due to a lack of those advanced synchronization constructs. 
 
-2. 
+2. In a 2003 publication[fn:4] Nick Benton implements a solution to the problem in polyphonic C# (an extension to C# that provides more advanced concurency constructs), the solution he presents is shorter, more elegant and more effecient when compared to Ben-ari's solution in Ada95.
+
+3. In a 2008 paper[fn:5] Jason Hurt and Jan B. Pedersen show multiple solutions in multiple language using a multitude of different concurrency mechanisms and use the Santa Cluase problem as a way to compare the strengths and weaknesses of these different concurrency mechanisms.
    
 * Conclusion
+The solution I present in this paper is not groundbreaking as C doesn't implement any advanced concurrency mechanisms that would allow for a more effecient or elegant solution, but, my solution does not run into the problem of Santa delivering presents and returning to the north pole while Reindeer are still waiting in the stable and not helping that is present in the original solution that Trono presented in his paper[fn:1] (Ben-Ari pointed out this issue in his paper[fn:3]).
 
 * Footnotes
 
@@ -366,3 +369,7 @@ There have been many papers discussing this problem and proposing new solutions 
 [fn:2] not defined in the original problem other than being more than three.
 
 [fn:3]M. Ben-Ari. How to solve the Santa Claus problem. Concurrency: Practice and Experience, 10(6):485–496, 1998.
+
+[fn:4] N. Benton. Jingle Bells: Solving the Santa Claus Problem in Polyphonic C#. Technical report, Microsoft Research, Cambdridge UK, 2003.
+
+[fn:5] Jason, H. U. R. T., and Jan B. Pedersen. "Solving the Santa Claus Problem: A comparison of various concurrent programming techniques." Communicating Process Architectures 2008: WoTUG-31 66 (2008): 381.
