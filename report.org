@@ -136,9 +136,9 @@ Here we define the deliver presents function for deer and the deer thread functi
   def deliverPresents()
     lock(deerMutex)
     deerInStable = deerInStable - 1
+    print "Reindeer (current_thread) helped deliver presents"
     unlock(deerMutex)
     signal(deerFinished)
-    print "Reindeer (current_thread) helped deliver presents"
   end
 
   # Function: Reindeer thread
@@ -265,11 +265,67 @@ The main function is simple, we just initialize our semaphores and mutexes, then
 
 
 * Implementation
+In this section I'll demonstrate my implemintation in C of the psuedocode, I will change the both constants for the number of deer and number of elves to 4 to make the output easier to follow and explain (and I changed the sleep time for both to 0-19 to illustrate both), but it also works fine with 9 Reindeer and 20 Elves and the normal timing.
 
+#+begin_src
+$ ./Santa_clause_problem
+reindeer (92) is vacationing for 3
+reindeer (88) is vacationing for 6
+reindeer (84) is vacationing for 15
+reindeer (80) is vacationing for 17
+Santa is sleeping in his office
+elf (76) is working for 13
+elf (72) is working for 15
+elf (68) is working for 6
+elf (92) is working for 12
+reindeer (92) arrived to the north pole and is waiting for Santa
+reindeer (88) arrived to the north pole and is waiting for Santa
+elf (68) has a problem and goes to Santa for help
+elf (92) has a problem and goes to Santa for help
+elf (76) has a problem and goes to Santa for help
+Santa helped an elf
+Santa helped an elf
+Santa helped three elves and closed his door
+Santa is sleeping in his office
+elf (68) got help from Santa
+elf (68) is working for 9
+elf (92) got help from Santa
+elf (92) is working for 1
+elf (76) got help from Santa
+elf (76) is working for 2
+elf (92) has a problem and goes to Santa for help
+reindeer (84) arrived to the north pole and is waiting for Santa
+elf (72) has a problem and goes to Santa for help
+elf (76) has a problem and goes to Santa for help
+Santa helped an elf
+Santa helped an elf
+Santa helped three elves and closed his door
+Santa is sleeping in his office
+elf (76) got help from Santa
+elf (76) is working for 7
+elf (92) got help from Santa
+elf (92) is working for 10
+elf (72) got help from Santa
+elf (72) is working for 19
+reindeer (80) arrived to the north pole and will wake up Santa
+Santa fastened a deer to the sleigh
+Santa fastened a deer to the sleigh
+Santa fastened a deer to the sleigh
+Santa fastened a deer to the sleigh
+Santa fastened a deer to the sleigh
+Santa fastened all the deer and will deliver the presents
+reindeer (92) helped deliver presents
+reindeer (92) is vacationing for 3
+reindeer (80) helped deliver presents
+reindeer (80) is vacationing for 6
+reindeer (88) helped deliver presents
+reindeer (88) is vacationing for 0
+reindeer (84) helped deliver presents
+reindeer (84) is vacationing for 6
+Santa delivered all presents and returned to the north pole
+Santa is sleeping in his office
+#+end_src
 * Conclusion
-
-
-\newpage
 
 * Footnotes
 
