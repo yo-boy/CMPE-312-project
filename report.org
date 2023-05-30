@@ -261,11 +261,10 @@ Initialization of mutexes and semaphores and creation of all of the threads in t
 
 The main function is simple, we just initialize our semaphores and mutexes, then create threads for each deer, elf, and for Santa, then run those threads with the functions we had defined, we have a join statement for Santa to insure that the program doesn't terminate, none of our threads will return anyway since they all implement an infinite loop.
 
-* History of the problem
-
-
 * Implementation
 In this section I'll demonstrate my implemintation in C of the psuedocode, I will change the both constants for the number of deer and number of elves to 4 to make the output easier to follow and explain (and I changed the sleep time for both to 0-19 to illustrate both), but it also works fine with 9 Reindeer and 20 Elves and the normal timing.
+
+I will insert my commentary on what the program is doing between the lines of the output.
 
 #+begin_src
 $ ./Santa_clause_problem
@@ -278,6 +277,11 @@ elf (76) is working for 13
 elf (72) is working for 15
 elf (68) is working for 6
 elf (92) is working for 12
+#+end_src
+
+In this section the program runs the main() function, it first initializes the mutexes and semaphores (which is not seen here, it happens in the background), and then it starts the reindeer threads using the deer() function as the thread function and the first thing that happens within this function is the deer taking a random number and vacationing (sleeping) for that long, then Santa thread is initialized using the santa() function as the thread function the santa function prints Santa's state and then waits on the wakeSanta semaphore, after that we can see the elf threads get initialized using the elf() function as the thread function and they take a random number and work(sleep) for that long just like the deer.
+
+#+begin_src
 reindeer (92) arrived to the north pole and is waiting for Santa
 reindeer (88) arrived to the north pole and is waiting for Santa
 elf (68) has a problem and goes to Santa for help
@@ -293,6 +297,11 @@ elf (92) got help from Santa
 elf (92) is working for 1
 elf (76) got help from Santa
 elf (76) is working for 2
+#+end_src
+
+Here we can see that two of the Reindeer (number 92 and 88) return after the random time they chose ends, but because those were the only two then they'll just wait in the stable after they see that the amount of deer in the stable is not equal to all of the deer (which is decided by the DEER constant), after this we can see three elves (68, 92 and 76) run into problems and go to Santa for help, the first two see that they aren't three yet and so just wait on helpQue, the third elf after seeing the other two at the door wakes up Santa using the wakeSanta semaphore and then he waits on the lastElf semaphore, then Santa helps each elf (by signaling the help que for the first two elves, then signaling lastElf and helpQue again for the last elf), once each elf gets the signal on helpQue they run the getHelp function, Santa is free after signaling the elves.
+
+#+begin_src
 elf (92) has a problem and goes to Santa for help
 reindeer (84) arrived to the north pole and is waiting for Santa
 elf (72) has a problem and goes to Santa for help
@@ -307,6 +316,11 @@ elf (92) got help from Santa
 elf (92) is working for 10
 elf (72) got help from Santa
 elf (72) is working for 19
+#+end_src
+
+Here we see an elf arrive waiting on helpQue, and then a reindeer arrives and waits on deerWaiting, before two more elves arrives, the second waits on helpQue, and the third wakes up Santa and then waits on lastElf (this elf does not let go of santaLock, so no more elves or deer can arrive until Santa signals lastElf after helping the elves), then we can see Santa helps the elves and they all go back to work after getting the help.
+
+#+begin_src
 reindeer (80) arrived to the north pole and will wake up Santa
 Santa fastened a deer to the sleigh
 Santa fastened a deer to the sleigh
@@ -325,6 +339,19 @@ reindeer (84) is vacationing for 6
 Santa delivered all presents and returned to the north pole
 Santa is sleeping in his office
 #+end_src
+
+Here the last Reindeer arrives and sees all of the other Reindeer already waiting, so the last one goes to wake up Santa by Signaling wakeSanta (after locking santaLock), and then this last deer goes back to the stable and waits on deerWaiting, then we can see that Santa fastens all of the Reindeer to the sleigh by signaling deerWaiting for each Reindeer, after this is done Santa sets deerReady to true which was the barrier that all of the deer were waiting on, this Signals all of the Reindeer to deliver presents by calling the deliverPresents() function, then Santa waits in a loop for every deer to signal deerFinished (which they do in the deliverPresents() function after they are done helping), then after every deer is finished delivering presents Santa resets the deerReady flag to false and then returns to his office in the northpole to sleep (wait on wakeSanta semaphore).
+
+#+begin_src
+reindeer (88) arrived to the north pole and is waiting for Santa
+elf (68) has a problem and goes to Santa for help
+elf (76) has a problem and goes to Santa for help
+#+end_src
+
+Then here we can see that the loop will continue forever with deer returning from their vacations and elves running into problems while working, with Santa helping them.
+
+* History of the problem
+
 * Conclusion
 
 * Footnotes
